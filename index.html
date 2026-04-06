@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>高二7抽签</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0a0a1a;
+    color: #fff;
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+  }
+
+  .top-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 32px;
+    font-size: 14px;
+    color: rgba(255,255,255,0.35);
+    z-index: 10;
+  }
+
+  .top-bar .round-info {
+    font-size: 15px;
+    color: rgba(255,255,255,0.5);
+  }
+
+  .top-bar .reset-btn {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.45);
+    padding: 6px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+  }
+  .top-bar .reset-btn:hover {
+    background: rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.7);
+  }
+
+  .main-name {
+    font-size: clamp(80px, 18vw, 200px);
+    font-weight: 900;
+    letter-spacing: 12px;
+    text-align: center;
+    line-height: 1.1;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  .main-name.animate {
+    animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes popIn {
+    0%   { transform: scale(0.5); opacity: 0; }
+    60%  { transform: scale(1.08); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .name-extra {
+    text-align: center;
+    margin-top: 12px;
+    font-size: clamp(16px, 2.5vw, 22px);
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 3px;
+    min-height: 30px;
+  }
+
+  .divider {
+    width: 120px;
+    height: 1px;
+    background: rgba(255,255,255,0.08);
+    margin: 28px auto;
+  }
+
+  .btn-area {
+    margin-top: 16px;
+  }
+
+  .draw-btn {
+    background: linear-gradient(135deg, #4f9cff, #3b7dd8);
+    border: none;
+    color: #fff;
+    font-size: clamp(18px, 3vw, 24px);
+    font-weight: 600;
+    padding: 18px 72px;
+    border-radius: 50px;
+    cursor: pointer;
+    letter-spacing: 6px;
+    box-shadow: 0 4px 30px rgba(79,156,255,0.25);
+    transition: all 0.2s;
+  }
+  .draw-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 40px rgba(79,156,255,0.4);
+  }
+  .draw-btn:active {
+    transform: translateY(0);
+  }
+  .draw-btn:disabled {
+    background: #333;
+    color: #666;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .history {
+    margin-top: 40px;
+    text-align: center;
+    max-width: 700px;
+    width: 90%;
+  }
+  .history-title {
+    font-size: 12px;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+  }
+  .history-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+  .history-item {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.55);
+  }
+  .history-item .num {
+    color: rgba(255,255,255,0.25);
+    margin-right: 4px;
+    font-size: 11px;
+  }
+
+  .welcome {
+    text-align: center;
+    color: rgba(255,255,255,0.2);
+    font-size: clamp(40px, 10vw, 100px);
+    font-weight: 300;
+    letter-spacing: 10px;
+    line-height: 1.2;
+  }
+  .welcome-sub {
+    text-align: center;
+    color: rgba(255,255,255,0.15);
+    font-size: clamp(12px, 2vw, 16px);
+    margin-top: 16px;
+    letter-spacing: 4px;
+  }
+
+  .grade-badge {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 10px;
+    letter-spacing: 2px;
+  }
+  .grade-good  { background: rgba(76,220,100,0.15); color: #4edc64; border: 1px solid rgba(76,220,100,0.25); }
+  .grade-mid   { background: rgba(255,200,60,0.15); color: #ffc83c; border: 1px solid rgba(255,200,60,0.25); }
+  .grade-bad   { background: rgba(255,90,90,0.15); color: #ff5a5a; border: 1px solid rgba(255,90,90,0.25); }
+  .grade-neutral { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.1); }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="round-info" id="roundInfo">高二7抽签</div>
+  <div style="display:flex;gap:10px">
+    <button class="reset-btn" onclick="resetDraw()">重置</button>
+    <button class="reset-btn" onclick="restorePos()">恢复</button>
+  </div>
+</div>
+
+<div id="content">
+  <div class="welcome" id="welcome">点击下方按钮<br>开始抽签</div>
+  <div class="welcome-sub" id="welcomeSub"></div>
+  <div class="btn-area" id="welcomeBtnArea" style="margin-top:40px">
+    <button class="draw-btn" onclick="startDraw()">开始抽签</button>
+  </div>
+</div>
+
+<script>
+// 高二7抽签数据（16轮，每轮5人）
+const ROUNDS = [
+  [
+    { name:"柳智楠", seat:11, group:11, score:54.7, grade:"好" },
+    { name:"丘佳欣", seat:3,  group:1,  score:43.7, grade:"差" },
+    { name:"林祺彦", seat:5,  group:3,  score:53.4, grade:"中" },
+    { name:"邱梓莹", seat:6,  group:4,  score:47.4, grade:"中" },
+    { name:"叶夏蕾", seat:10, group:5,  score:61.5, grade:"好" },
+  ],
+  [
+    { name:"刘秀芸", seat:2,  group:6,  score:64.8, grade:"好" },
+    { name:"林瑶",   seat:7,  group:7,  score:46.6, grade:"差" },
+    { name:"吴宇泽", seat:8,  group:8,  score:43.8, grade:"差" },
+    { name:"吴煜晨", seat:9,  group:9,  score:52.8, grade:"中" },
+    { name:"叶丰源", seat:18, group:10, score:61.2, grade:"好" },
+  ],
+  [
+    { name:"陈浩翔", seat:4,  group:12, score:56.2, grade:"好" },
+    { name:"黄欣彤", seat:23, group:1,  score:53.1, grade:"中" },
+    { name:"陈心语", seat:20, group:2,  score:37.4, grade:"差" },
+    { name:"宋思蒙", seat:31, group:3,  score:47.7, grade:"中" },
+    { name:"魏欣霖", seat:40, group:4,  score:53.9, grade:"中" },
+  ],
+  [
+    { name:"苏璟雯", seat:21, group:5,  score:50.2, grade:"中" },
+    { name:"费思晨", seat:10, group:6,  score:50.9, grade:"中" },
+    { name:"阮欣烨", seat:25, group:7,  score:53.4, grade:"中" },
+    { name:"叶文歆", seat:47, group:8,  score:48.1, grade:"中" },
+    { name:"林晓",   seat:19, group:9,  score:47.2, grade:"中" },
+  ],
+  [
+    { name:"李文杰", seat:33, group:10, score:52.3, grade:"中" },
+    { name:"兰鑫滢", seat:22, group:11, score:45.5, grade:"中" },
+    { name:"练闽辉", seat:28, group:12, score:41.6, grade:"差" },
+    { name:"黄颖",   seat:38, group:1,  score:52.1, grade:"中" },
+    { name:"许梦瑶", seat:27, group:2,  score:49.6, grade:"中" },
+  ],
+  [
+    { name:"陆连洁", seat:36, group:3,  score:52.7, grade:"中" },
+    { name:"杜雯青", seat:44, group:4,  score:48.8, grade:"中" },
+    { name:"胡瑾萱", seat:43, group:5,  score:49.5, grade:"中" },
+    { name:"林芷珊", seat:35, group:6,  score:41.4, grade:"差" },
+    { name:"黄昱欣", seat:30, group:7,  score:50.3, grade:"中" },
+  ],
+  [
+    { name:"陈厚儒", seat:48, group:8,  score:47.8, grade:"中" },
+    { name:"林思言", seat:29, group:9,  score:44.4, grade:"中" },
+    { name:"吴林杰", seat:17, group:10, score:33.7, grade:"差" },
+    { name:"王晨珍", seat:32, group:11, score:56.0, grade:"好" },
+    { name:"谢承烨", seat:34, group:12, score:48.7, grade:"中" },
+  ],
+  [
+    { name:"李云柏", seat:39, group:12, score:45.6, grade:"中" },
+    { name:"刘沛菁", seat:12, group:1,  score:45.7, grade:"中" },
+    { name:"陈宇琳", seat:24, group:2,  score:48.8, grade:"中" },
+    { name:"黄枝丽", seat:37, group:3,  score:46.0, grade:"中" },
+    { name:"丁子鑫", seat:4,  group:4,  score:49.2, grade:"中" },
+  ],
+  [
+    { name:"雷雨杉", seat:41, group:5,  score:41.2, grade:"差" },
+    { name:"袁丽萍", seat:7,  group:6,  score:44.1, grade:"中" },
+    { name:"林凌",   seat:45, group:7,  score:54.4, grade:"好" },
+    { name:"吴书航", seat:14, group:8,  score:50.7, grade:"中" },
+    { name:"赵鑫诚", seat:11, group:9,  score:57.7, grade:"好" },
+  ],
+  [
+    { name:"柳邵钧", seat:17, group:10, score:53.4, grade:"中" },
+    { name:"喻雪",   seat:32, group:11, score:46.7, grade:"中" },
+    { name:"陈钰嘉", seat:15, group:2,  score:51.1, grade:"中" },
+    { name:"陈浩翔", seat:4,  group:12, score:56.2, grade:"好" },
+    { name:"丘佳欣", seat:3,  group:1,  score:43.7, grade:"差" },
+  ],
+  [
+    { name:"黄欣彤", seat:23, group:1,  score:53.1, grade:"中" },
+    { name:"林祺彦", seat:5,  group:3,  score:53.4, grade:"中" },
+    { name:"邱梓莹", seat:6,  group:4,  score:47.4, grade:"中" },
+    { name:"刘秀芸", seat:2,  group:6,  score:64.8, grade:"好" },
+    { name:"吴煜晨", seat:9,  group:9,  score:52.8, grade:"中" },
+  ],
+  [
+    { name:"叶丰源", seat:18, group:10, score:61.2, grade:"好" },
+    { name:"陈心语", seat:20, group:2,  score:37.4, grade:"差" },
+    { name:"魏欣霖", seat:40, group:4,  score:53.9, grade:"中" },
+    { name:"阮欣烨", seat:25, group:7,  score:53.4, grade:"中" },
+    { name:"练闽辉", seat:28, group:12, score:41.6, grade:"差" },
+  ],
+  [
+    { name:"苏璟雯", seat:21, group:5,  score:50.2, grade:"中" },
+    { name:"费思晨", seat:10, group:6,  score:50.9, grade:"中" },
+    { name:"叶文歆", seat:47, group:8,  score:48.1, grade:"中" },
+    { name:"李文杰", seat:33, group:10, score:52.3, grade:"中" },
+    { name:"许梦瑶", seat:27, group:2,  score:49.6, grade:"中" },
+  ],
+  [
+    { name:"林瑶",   seat:7,  group:7,  score:46.6, grade:"差" },
+    { name:"吴宇泽", seat:8,  group:8,  score:43.8, grade:"差" },
+    { name:"林晓",   seat:19, group:9,  score:47.2, grade:"中" },
+    { name:"兰鑫滢", seat:22, group:11, score:45.5, grade:"中" },
+    { name:"陆连洁", seat:36, group:3,  score:52.7, grade:"中" },
+  ],
+  [
+    { name:"杜雯青", seat:44, group:4,  score:48.8, grade:"中" },
+    { name:"胡瑾萱", seat:43, group:5,  score:49.5, grade:"中" },
+    { name:"林芷珊", seat:35, group:6,  score:41.4, grade:"差" },
+    { name:"陈厚儒", seat:48, group:8,  score:47.8, grade:"中" },
+    { name:"吴林杰", seat:17, group:10, score:33.7, grade:"差" },
+  ],
+  [
+    { name:"黄昱欣", seat:30, group:7,  score:50.3, grade:"中" },
+    { name:"林思言", seat:29, group:9,  score:44.4, grade:"中" },
+    { name:"王晨珍", seat:32, group:11, score:56.0, grade:"好" },
+    { name:"丁子鑫", seat:4,  group:4,  score:49.2, grade:"中" },
+    { name:"袁丽萍", seat:7,  group:6,  score:44.1, grade:"中" },
+  ],
+];
+
+const TOTAL = ROUNDS.length * 5; // 80
+
+let pos = parseInt(localStorage.getItem('drawPos') || '0');
+let history = JSON.parse(localStorage.getItem('drawHistory') || '[]');
+
+function save() {
+  localStorage.setItem('drawPos', pos);
+  localStorage.setItem('drawHistory', JSON.stringify(history));
+}
+
+function getGradeClass(grade) {
+  if (grade === '好') return 'grade-good';
+  if (grade === '差') return 'grade-bad';
+  return 'grade-neutral';
+}
+
+function render() {
+  const content = document.getElementById('content');
+  const btnArea = document.getElementById('btnArea');
+  document.getElementById('roundInfo').textContent = `第 ${pos} / ${TOTAL} 位`;
+
+  if (pos === 0) {
+    content.innerHTML = `
+      <div class="welcome">点击下方按钮<br>开始抽签</div>
+      <div class="welcome-sub"></div>
+      <div class="btn-area" style="margin-top:40px">
+        <button class="draw-btn" onclick="drawNext()">开始抽签</button>
+      </div>
+      <div class="history" id="historySection" style="display:none">
+        <div class="history-title">已抽取</div>
+        <div class="history-list" id="historyList"></div>
+      </div>
+    `;
+    return;
+  }
+
+  const last = history[history.length - 1];
+  const gradeClass = getGradeClass(last.grade);
+
+  let historyHtml = '';
+  history.forEach((h, i) => {
+    historyHtml += `<div class="history-item"><span class="num">${i+1}</span>${h.name}</div>`;
+  });
+
+  content.innerHTML = `
+    <div class="main-name" id="mainName">${last.name}</div>
+    <div class="name-extra">座号 ${last.seat} · 第${last.group}组 · ${last.score}分</div>
+    <div style="text-align:center"><span class="grade-badge ${gradeClass}">${last.grade}</span></div>
+    <div class="divider"></div>
+    <div class="btn-area" id="btnArea">
+      ${pos >= TOTAL
+        ? `<button class="draw-btn" disabled>已全部抽完（${TOTAL}人）</button>`
+        : `<button class="draw-btn" onclick="drawNext()">抽取下一位</button>`
+      }
+    </div>
+    <div class="history">
+      <div class="history-title">已抽取 ${history.length} / ${TOTAL}</div>
+      <div class="history-list" id="historyList">${historyHtml}</div>
+    </div>
+  `;
+}
+
+function startDraw() {
+  pos = 0;
+  history = [];
+  save();
+  drawNext();
+}
+
+function drawNext() {
+  if (pos >= TOTAL) return;
+  const roundIdx = Math.floor(pos / 5);
+  const innerIdx = pos % 5;
+  const student = ROUNDS[roundIdx][innerIdx];
+  history.push(student);
+  pos++;
+  save();
+  render();
+  // animate
+  const el = document.getElementById('mainName');
+  if (el) {
+    el.classList.remove('animate');
+    void el.offsetWidth;
+    el.classList.add('animate');
+  }
+}
+
+function resetDraw() {
+  if (!confirm('确定要重置抽签吗？所有记录将清空。')) return;
+  pos = 0;
+  history = [];
+  save();
+  render();
+}
+
+function restorePos() {
+  pos = 0;
+  history = [];
+  save();
+  render();
+}
+
+// init
+render();
+</script>
+</body>
+</html>
